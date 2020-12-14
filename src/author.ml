@@ -100,15 +100,16 @@ let run ?(max_iter = 0) () =
           Store.add_word store w ;
           Option.iter
             (fun head ->
-              level := head.level ;
+              level := head.Word.level ;
               if head = w then (
                 Log.log_success "Head updated to incoming word %a@." Word.pp w ;
                 author_score := (!author_score + (update_author_score head));
+                (*level:= (!level+1);*)
                 Log.log_success "Score de l'auteur : %d\n" !author_score ;
                 send_new_letter sk pk !level store letter_bag;
                 )
               else Log.log_info "incoming word %a not a new head@." Word.pp w)
-            (Consensus.head ~level:(!level - 1) store)
+            (Consensus.head ~level:(!level ) store)
         | Messages.Inject_letter _ | _ -> () ) ;
       loop (max_iter - 1) )
   in

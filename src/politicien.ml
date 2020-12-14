@@ -182,13 +182,12 @@ let run ?(max_iter = 0) () =
                 (* Mon propre mot a peut-etre ete ajouté, je dois calculer mon score! *)
               else Log.log_info "incoming word %a not a new head@.\n" Word.pp w)
             (Consensus.head ~level:(!level - 1) store)*)
-      | Messages.Next_turn _ ->
-        
-      | Messages.Inject_letter _ | _ ->
+             
+      | Messages.Inject_letter _ -> (
       Client_utils.send_some (Messages.Get_letterpool_since !level);
         let lpool = wait_for_letterpool () in
         Store.add_letters st.letter_store lpool.letters;
-        level := lpool.Messages.current_period ;
+        level := lpool.Messages.current_period;
         send_new_word !level st;
         (*Mettre a jour le word store -> maybe un get wordpool*)
         Client_utils.send_some (Messages.Get_full_wordpool);
@@ -198,12 +197,14 @@ let run ?(max_iter = 0) () =
         then
         let w = get_latest_word (List.map snd wpool.words) in
         Option.iter
-            (fun head ->
-              if head = w 
-              then  (politicien_score := (!politicien_score + (Consensus.word_score head));
-              Log.log_success "Mon mot a été accepté comme head ! Score de du politicien : %d\n" !politicien_score ;))
-            (Consensus.head ~level:(!level - 1) st.word_store)
+          (fun head ->
+            if head = w 
+            then  (politicien_score := (!politicien_score + (Consensus.word_score head));
+            level := !level + 1;
+            Log.log_success "Mon mot a été accepté comme head ! Score de du politicien : %d\n" !politicien_score ;))
+          (Consensus.head ~level:(!level) st.word_store);)
       
+      | _ -> ()
        );
       loop (max_iter - 1) )
   in
