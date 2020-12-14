@@ -100,10 +100,6 @@ let send_new_word level st =
   (* then send it to the server *)
 
 let run ?(max_iter = 0) () =
-  (* ignoring unused variables - to be removed *)
-  (*ignore max_iter ;*)
-
-  (* end ignoring unused variables - to be removed *)
 
   (* Generate public/secret keys *)
   Log.log_info "Generation de la clef prive/publique\n" ;
@@ -115,13 +111,6 @@ let run ?(max_iter = 0) () =
   let getpool = Messages.Get_full_wordpool in
   Client_utils.send_some getpool ;
 
-  (*
-  let wordpool =
-    match Client_utils.receive () with
-    | Messages.Full_wordpool wordpool -> wordpool
-    | _ -> assert false
-  in
-*)
   let rec wait_for_wordpool (): Messages.wordpool =
     match Client_utils.receive () with
       | Messages.Full_wordpool wordpool -> wordpool
@@ -175,14 +164,13 @@ let run ?(max_iter = 0) () =
     in
 
   (*  main loop *)
-  (*failwith ("à programmer" ^ __LOC__)*)
   let level = ref wordpool.current_period in
   let rec loop max_iter =
     if max_iter = 0 then ()
     else (
       
       ( match Client_utils.receive () with
-      (* le politicien doit savoir s'il y a une nouvelle head parce qu'il devra changer ses lettres// Pas sur *)
+      (*Doit servir pour la version en roue libre*)
       (*| Messages.Inject_word w ->
           Store.add_word store w ;
           Option.iter

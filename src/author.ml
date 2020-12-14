@@ -49,11 +49,6 @@ let run ?(max_iter = 0) () =
   let reg_msg = Messages.Register pk in
   Client_utils.send_some reg_msg ;
   Unix.sleep 3;
-  (* drop provided letter_bag *)
-  (*
-  ( match Client_utils.receive () with
-  | Messages.Letters_bag _ -> () (*l -> letter_bag := l *)
-  | _ -> assert false ) ; *)
 
   let rec wait_for_letterbag (): char list =
     match Client_utils.receive () with
@@ -66,14 +61,6 @@ let run ?(max_iter = 0) () =
   (* Get initial wordpool *)
   let getpool = Messages.Get_full_wordpool in
   Client_utils.send_some getpool ;
-
-  (*
-  let wordpool =
-    match Client_utils.receive () with
-    | Messages.Full_wordpool wordpool -> wordpool
-    | _ -> assert false (*  Ici gerer correctement la réponse*)
-  in
-  *)
 
   let update_author_score head : int =
     let w = head.Word.word in 
@@ -93,8 +80,6 @@ let run ?(max_iter = 0) () =
       | _ -> wait_for_wordpool ()
   in    
   let wordpool = wait_for_wordpool () in
-
-  (* let auth : author = { letter_bag = letterbag; score=0 } in *)
 
   (* Generate initial blocktree *)
   let store = Store.init_words () in
