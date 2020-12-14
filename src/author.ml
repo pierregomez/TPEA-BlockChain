@@ -21,14 +21,6 @@ let get_random_char leetterbag =
   let n = Random.int (List.length leetterbag) in
   List.nth leetterbag n;;
 
-  (* 
-  let get_random_char leetterbag =
-  match (Array.length leetterbag) with 
-  |  0 -> assert false
-  | 1 -> Array.get leetterbag 0
-  | _ -> let n = Random.int (Array.length leetterbag) in
-      Array.get leetterbag n;;
-  *)
 
 let send_new_letter sk pk level store letter_bag =
   (* Get blockchain head *)
@@ -42,7 +34,7 @@ let send_new_letter sk pk level store letter_bag =
           pk
           level
           (Word.to_bigstring head) 
-          (get_random_char letter_bag)     (*(random_char ()*)
+          (get_random_char letter_bag)
       in
       (* Send letter *)
       let message = Messages.Inject_letter letter in
@@ -108,7 +100,7 @@ let run ?(max_iter = 0) () =
   let store = Store.init_words () in
   Store.add_words store wordpool.words ;
   (* Create and send first letter *)
-  send_new_letter sk pk wordpool.current_period store letter_bag;
+  send_new_letter sk pk wordpool.current_period store letter_bag; (* attention période *)
 
   (* start listening to server messages *)
   Client_utils.send_some Messages.Listen ;
@@ -123,16 +115,16 @@ let run ?(max_iter = 0) () =
           Store.add_word store w ;
           Option.iter
             (fun head ->
+              level := head.level ;
               if head = w then (
                 Log.log_success "Head updated to incoming word %a@." Word.pp w ;
                 author_score := (!author_score + (update_author_score head));
                 Log.log_success "Score de l'auteur : %d\n" !author_score ;
-                (*send_new_letter sk pk !level store *)
+                send_new_letter sk pk !level store letter_bag;
                 )
               else Log.log_info "incoming word %a not a new head@." Word.pp w)
             (Consensus.head ~level:(!level - 1) store)
-      | Messages.Next_turn p -> level := p;  send_new_letter sk pk !level store letter_bag;  (* 2 étapes :*)
-      | Messages.Inject_letter _ | _ -> () ) ;
+        | Messages.Inject_letter _ | _ -> () ) ;
       loop (max_iter - 1) )
   in
   loop max_iter;
@@ -142,7 +134,7 @@ let _ =
   let main =
     Random.self_init () ;
     let () = Client_utils.connect () in
-    run ~max_iter: (20) () (* Ici nombre de messages avant d'afficher les resultats *)
+    run ~max_iter: (20) ()
 
   in
   main

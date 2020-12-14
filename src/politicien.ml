@@ -194,8 +194,10 @@ let run ?(max_iter = 0) () =
                 (* Mon propre mot a peut-etre ete ajouté, je dois calculer mon score! *)
               else Log.log_info "incoming word %a not a new head@.\n" Word.pp w)
             (Consensus.head ~level:(!level - 1) store)*)
-      | Messages.Next_turn _ -> (* Attention: Detail des lettres qui doublent *)
-        Client_utils.send_some (Messages.Get_letterpool_since !level);
+      | Messages.Next_turn _ ->
+        
+      | Messages.Inject_letter _ | _ ->
+      Client_utils.send_some (Messages.Get_letterpool_since !level);
         let lpool = wait_for_letterpool () in
         Store.add_letters st.letter_store lpool.letters;
         level := lpool.Messages.current_period ;
@@ -213,7 +215,8 @@ let run ?(max_iter = 0) () =
               then  (politicien_score := (!politicien_score + (Consensus.word_score head));
               Log.log_success "Mon mot a été accepté comme head ! Score de du politicien : %d\n" !politicien_score ;))
             (Consensus.head ~level:(!level - 1) st.word_store)
-      | Messages.Inject_letter _ | _ -> () );
+      
+       );
       loop (max_iter - 1) )
   in
   loop max_iter;

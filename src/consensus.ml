@@ -77,4 +77,3 @@ match level with
                 else let possible_heads = (Hashtbl.find st.words_table newest.head)::(same_period_words wordlist newest.level []) in
                 let current_head = (get_best possible_heads newest) in
                 Some current_head
-                (* verifier quand meme que le mot est valide !!!!!!!!!!!!!!!!!!!!!!!!!!*)
